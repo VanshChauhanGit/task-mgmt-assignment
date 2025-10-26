@@ -78,7 +78,14 @@ export const signin = async (req, res, next) => {
 
     const { password: pass, ...rest } = validUser._doc
 
-    res.status(200).cookie("access_token", token, { httpOnly: true }).json(rest)
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      path: "/",
+    };
+
+    res.status(200).cookie("access_token", token, cookieOptions).json(rest);
   } catch (error) {
     next(error)
   }
@@ -143,11 +150,18 @@ export const uploadImage = async (req, res, next) => {
 
 export const signout = async (req, res, next) => {
   try {
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      path: "/",
+    };
+
     res
-      .clearCookie("access_token")
+      .clearCookie("access_token", cookieOptions)
       .status(200)
-      .json("User has been loggedout successfully!")
+      .json("User has been loggedout successfully!");
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
